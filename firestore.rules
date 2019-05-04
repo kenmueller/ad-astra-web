@@ -1,0 +1,16 @@
+service cloud.firestore {
+	match /databases/{database}/documents {
+		match /public/{url}/html {
+			allow read
+			allow write: if isValidString(newData())
+		}
+
+		function newData() {
+			return request.resource.data
+		}
+
+		function isValidString(data) {
+			return (data is string) && data.trim().length != 0
+		}
+	}
+}
