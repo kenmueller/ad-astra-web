@@ -7,7 +7,7 @@ const firestore = admin.firestore()
 const app = express()
 
 app.get('/edit/:url', (req, res) => {
-	const url = req.url.split('/').slice(2).join('/')
+	const url = req.params.url
 	return firestore.doc(`public/${url.replace('/', '\\')}`).get().then(page => page.exists
 		? res.status(200).send(createPage(
 			`Edit ${url}`,
@@ -26,9 +26,11 @@ app.get('/edit/:url', (req, res) => {
 			`,
 			`
 				const textarea = document.querySelector('.textarea.edit.html')
-				textarea.value = '${page.data()!.html}'
+				textarea.value = \`${page.data()!.html}\`
 				document.querySelector('.button.edit.complete').addEventListener('click', () =>
-					firebase.firestore().doc('public/${url.replace('/', '\\\\')}').update({ html: textarea.value })
+					textarea.value.trim().length === 0
+						? firebase.firestore().doc('public/${url.replace('/', '\\\\')}').delete().then(() => location.reload())
+						: firebase.firestore().doc('public/${url.replace('/', '\\\\')}').update({ html: textarea.value })
 				)
 			`
 		))
@@ -70,7 +72,7 @@ exports.app = functions.https.onRequest((req, res) => {
 						complete.addEventListener('click', () =>
 							textarea.value.trim().length === 0
 								? Promise.resolve()
-								: firebase.firestore().doc('public/${url.length === 0 ? '\\\\' : url.replace('/', '\\\\')}').set({ html: textarea.value })
+								: firebase.firestore().doc('public/${url.length === 0 ? '\\\\' : url.replace('/', '\\\\')}').set({ html: textarea.value }).then(() => location.reload())
 						)
 					`
 				)
@@ -97,9 +99,11 @@ function editIndex(res: functions.Response): Promise<void | functions.Response> 
 			`,
 			`
 				const textarea = document.querySelector('.textarea.edit.html')
-				textarea.value = '${page.data()!.html}'
+				textarea.value = \`${page.data()!.html}\`
 				document.querySelector('.button.edit.complete').addEventListener('click', () =>
-					firebase.firestore().doc('public/\\\\').update({ html: textarea.value })
+					textarea.value.trim().length === 0
+						? firebase.firestore().doc('public/\\\\').delete().then(() => location.reload())
+						: firebase.firestore().doc('public/\\\\').update({ html: textarea.value })
 				)
 			`
 		))
