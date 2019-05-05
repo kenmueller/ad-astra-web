@@ -26,12 +26,14 @@ app.get('/edit/:url', (req, res) => {
 			`,
 			`
 				const textarea = document.querySelector('.textarea.edit.html')
+				const complete = document.querySelector('.button.edit.complete')
 				textarea.value = \`${page.data()!.html}\`
-				document.querySelector('.button.edit.complete').addEventListener('click', () =>
-					textarea.value.trim().length === 0
+				complete.addEventListener('click', () => {
+					complete.classList.add('is-loading')
+					return textarea.value.trim().length === 0
 						? firebase.firestore().doc('public/${url.replace('/', '\\\\')}').delete().then(() => location.reload())
-						: firebase.firestore().doc('public/${url.replace('/', '\\\\')}').update({ html: textarea.value })
-				)
+						: firebase.firestore().doc('public/${url.replace('/', '\\\\')}').update({ html: textarea.value }).then(() => complete.classList.remove('is-loading'))
+				})
 			`
 		))
 		: res.status(404).redirect(`/${url}`)
@@ -69,11 +71,12 @@ exports.app = functions.https.onRequest((req, res) => {
 						textarea.addEventListener('input', () =>
 							complete.disabled = textarea.value.trim().length === 0
 						)
-						complete.addEventListener('click', () =>
-							textarea.value.trim().length === 0
-								? Promise.resolve()
+						complete.addEventListener('click', () => {
+							complete.classList.add('is-loading')
+							return textarea.value.trim().length === 0
+								? Promise.resolve().then(() => complete.classList.remove('is-loading'))
 								: firebase.firestore().doc('public/${url.length === 0 ? '\\\\' : url.replace('/', '\\\\')}').set({ html: textarea.value }).then(() => location.reload())
-						)
+						})
 					`
 				)
 			)
@@ -99,12 +102,14 @@ function editIndex(res: functions.Response): Promise<void | functions.Response> 
 			`,
 			`
 				const textarea = document.querySelector('.textarea.edit.html')
+				const complete = document.querySelector('.button.edit.complete')
 				textarea.value = \`${page.data()!.html}\`
-				document.querySelector('.button.edit.complete').addEventListener('click', () =>
-					textarea.value.trim().length === 0
+				complete.addEventListener('click', () => {
+					complete.classList.add('is-loading')
+					return textarea.value.trim().length === 0
 						? firebase.firestore().doc('public/\\\\').delete().then(() => location.reload())
-						: firebase.firestore().doc('public/\\\\').update({ html: textarea.value })
-				)
+						: firebase.firestore().doc('public/\\\\').update({ html: textarea.value }).then(() => complete.classList.remove('is-loading'))
+				})
 			`
 		))
 		: res.status(404).redirect('/')
