@@ -61,7 +61,7 @@ exports.app = functions.https.onRequest((req, res) => {
 					`
 						<textarea class="textarea new html" placeholder="Write your HTML here"></textarea>
 						<br>
-						<a class="button is-large is-success new complete" disabled><strong>Create</strong></a>
+						<button class="button is-large is-success new complete" disabled><strong>Create</strong></button>
 					`,
 					`
 						const textarea = document.querySelector('.textarea.new.html')
