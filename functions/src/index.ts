@@ -17,6 +17,7 @@ app.get('/edit/:url', (req, res) => {
 				}
 				.button.edit.complete {
 					margin: auto;
+					display: block;
 				}
 			`,
 			`
@@ -58,6 +59,7 @@ exports.app = functions.https.onRequest((req, res) => {
 						}
 						.button.new.complete {
 							margin: auto;
+							display: block;
 						}
 					`,
 					`
@@ -93,6 +95,7 @@ function editIndex(res: functions.Response): Promise<void | functions.Response> 
 				}
 				.button.edit.complete {
 					margin: auto;
+					display: block;
 				}
 			`,
 			`
@@ -141,11 +144,20 @@ function createPage(title: string, style: string, body: string, script: string):
 						height: 100%;
 						background: #ECF0F3;
 					}
+					.box {
+						margin-top: 20px;
+					}
 					${style}
 				</style>
 			</head>
 			<body>
-				${body}
+				<div class="container">
+					<div class="columns">
+						<div class="column is-10 is-offset-1">
+							<div class="box">${body}</div>
+						</div>
+					</div>
+				</div>
 				<script>${script}</script>
 			</body>
 		</html>
